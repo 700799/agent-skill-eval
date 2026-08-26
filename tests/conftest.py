@@ -97,13 +97,21 @@ def trajectory_builder() -> type[TrajectoryBuilder]:
 
 
 class FakeLLM:
-    """Scriptable stand-in for llm.call_json: returns queued responses in order."""
+    """Scriptable stand-in for llm.anthropic_call_json: queued responses in order."""
 
     def __init__(self, responses: list[dict[str, Any]] | None = None) -> None:
         self.responses = list(responses or [])
         self.calls: list[dict[str, str]] = []
 
-    def __call__(self, *, system: str, user: str, model: str) -> dict[str, Any]:
+    def __call__(
+        self,
+        *,
+        system: str,
+        user: str,
+        model: str,
+        schema: Any = None,
+    ) -> dict[str, Any]:
+        del schema
         self.calls.append({"system": system, "user": user, "model": model})
         if not self.responses:
             raise AssertionError("FakeLLM ran out of scripted responses")
