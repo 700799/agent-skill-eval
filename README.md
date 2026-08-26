@@ -83,11 +83,16 @@ Every task runs in two arms:
 
 | Arm | How | Meaning |
 |---|---|---|
-| **Control** | `claude -p --bare` (no skills or settings) | What the model does unaided |
+| **Control** | `claude -p --disable-slash-commands` | What the model does unaided |
 | **Treatment** | Skill injected at `.claude/skills/<name>/SKILL.md` | What the skill adds |
 
 Reports give `treatment − control` deltas for pass rate, tokens, cost, duration,
 and each waste metric. Negative token/cost deltas mean the skill *saves*.
+
+> The control arm uses `--disable-slash-commands`, **not** `--bare`. `--bare`
+> only skips hooks, LSP, and plugin credentials — its help notes that "Skills
+> still resolve via `/skill-name`", so a `--bare` baseline would silently load
+> the very skill under test and understate its measured value.
 
 ---
 
