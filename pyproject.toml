@@ -69,6 +69,9 @@ module = "anthropic.*"
 follow_imports = "skip"
 
 [tool.pytest.ini_options]
+# Tests import helpers from tests.conftest, so the repo root must be on
+# sys.path for a bare `pytest` too (not just `python -m pytest`).
+pythonpath = ["."]
 addopts = "-m 'not live' -q"
 markers = [
     "live: requires an authenticated claude CLI and spends real tokens",
