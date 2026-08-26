@@ -122,7 +122,13 @@ class ScorecardEntry(BaseModel):
     critic_score: float | None = None
     mined_activations: int | None = None
     coverage: dict[str, bool] = Field(default_factory=dict)
+    #: Measured quality over the tiers that ran (thresholds use this).
     composite: float = 0.0
+    #: Share of total scoring weight backed by real evidence.
+    confidence: float = 0.0
+    #: composite shrunk toward a neutral prior by confidence; ranking uses this
+    #: so an unmeasured skill cannot outrank a measured one.
+    ranked_score: float = 0.0
     recommendation: Recommendation = "KEEP"
     merge_with: list[str] = Field(default_factory=list)
     reasons: list[str] = Field(default_factory=list)

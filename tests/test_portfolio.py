@@ -26,7 +26,7 @@ from agent_skill_eval.portfolio import (
     run_triggers,
     similarity_matrix,
 )
-from agent_skill_eval.portfolio.scorecard import ab_score
+from agent_skill_eval.portfolio.scorecard import ab_score, coverage_confidence, shrink
 from agent_skill_eval.portfolio.triggers import cross_activation_pairs, dump_probe_template
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
@@ -301,6 +301,35 @@ class TestScorecard:
         assert report.entries[0].skill == "fastapi-schema"
         assert all(e.reasons for e in report.entries)
         assert report.clusters[0].merge_into == "fastapi-schema"
+
+    def test_evidence_outranks_absence_of_evidence(self) -> None:
+        """A measured-good skill must not lose to an unmeasured one with clean lint."""
+        measured = SkillMeta(name="measured", path="m.md", description="d", body="b")
+        unmeasured = SkillMeta(name="unmeasured", path="u.md", description="d", body="b")
+        report = build_scorecard(
+            [measured, unmeasured],
+            lint_reports=[
+                LintReport(skill="measured", score=1.0),
+                LintReport(skill="unmeasured", score=1.0),
+            ],
+            ab_reports=[ab_for("measured")],
+        )
+        by_skill = {e.skill: e for e in report.entries}
+        assert report.entries[0].skill == "measured"
+        assert by_skill["measured"].confidence > by_skill["unmeasured"].confidence
+        assert by_skill["measured"].ranked_score > by_skill["unmeasured"].ranked_score
+        # the raw composites are equal — only evidence breaks the tie
+        assert by_skill["measured"].composite == by_skill["unmeasured"].composite
+
+    def test_confidence_and_shrinkage(self) -> None:
+        lint_only = {"lint": 1.0, "trigger": None, "ab": None, "critic": None}
+        assert coverage_confidence(lint_only) == pytest.approx(0.15)
+        full = {"lint": 1.0, "trigger": 1.0, "ab": 1.0, "critic": 1.0}
+        assert coverage_confidence(full) == pytest.approx(1.0)
+        # full evidence is taken at face value; none is pinned to the prior
+        assert shrink(0.9, 1.0) == pytest.approx(0.9)
+        assert shrink(0.9, 0.0) == pytest.approx(0.5)
+        assert shrink(1.0, 0.15) == pytest.approx(0.575)
 
     def test_lint_only_coverage_never_retires(self, example_skills: list[SkillMeta]) -> None:
         report = build_scorecard(example_skills, lint_reports=lint_all(example_skills))

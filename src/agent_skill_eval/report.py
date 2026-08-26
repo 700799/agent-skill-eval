@@ -134,9 +134,9 @@ def render_leaderboard(report: PortfolioReport) -> str:
         "",
         f"Generated: {report.generated_at}",
         "",
-        "| rank | skill | composite | recommendation | lint | trigger F1 | A/B | critic | "
-        "mined uses | reasons |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| rank | skill | score | confidence | recommendation | lint | trigger F1 | A/B | "
+        "critic | mined uses | reasons |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for rank, entry in enumerate(report.entries, start=1):
         recommendation: str = entry.recommendation
@@ -144,13 +144,18 @@ def render_leaderboard(report: PortfolioReport) -> str:
             recommendation += f" → {', '.join(entry.merge_with)}"
         mined = str(entry.mined_activations) if entry.mined_activations is not None else "—"
         lines.append(
-            f"| {rank} | `{entry.skill}` | {entry.composite:.2f} | **{recommendation}** | "
+            f"| {rank} | `{entry.skill}` | {entry.composite:.2f} | "
+            f"{entry.confidence * 100:.0f}% | **{recommendation}** | "
             f"{_fmt_component(entry.lint_score)} | {_fmt_component(entry.trigger_f1)} | "
             f"{_fmt_component(entry.ab_score)} | {_fmt_component(entry.critic_score)} | "
             f"{mined} | {'; '.join(entry.reasons)[:160]} |"
         )
     lines.append("")
-    lines.append("Missing tiers show as `—`; entries with thin coverage are capped at FIX.")
+    lines.append(
+        "Missing tiers show as `—`. Confidence is the share of scoring weight backed by "
+        "evidence; ranking shrinks low-confidence scores toward neutral so an unmeasured "
+        "skill cannot outrank a measured one, and thin coverage is never retired."
+    )
     if report.clusters:
         lines += ["", "## Overlap clusters", ""]
         for cluster in report.clusters:

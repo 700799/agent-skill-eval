@@ -31,6 +31,8 @@ RETIRE_COMPOSITE = 0.35
 FIX_COMPOSITE = 0.65
 MIN_TRIGGER_F1 = 0.70
 LOW_ADHERENCE = 0.50
+#: An unmeasured skill is neither good nor bad; sparse evidence shrinks toward this.
+NEUTRAL_PRIOR = 0.5
 
 
 def ab_score(reports: list[ABReport]) -> tuple[float, dict[str, float]] | None:
@@ -64,6 +66,25 @@ def composite_score(
     if not available or total_weight <= 0:
         return 0.0
     return sum(active.get(k, 0.0) * v for k, v in available.items()) / total_weight
+
+
+def coverage_confidence(
+    components: dict[str, float | None], weights: dict[str, float] | None = None
+) -> float:
+    """Share of the total scoring weight that real evidence covers."""
+    active = weights or config.DEFAULT_WEIGHTS
+    total = sum(active.values()) or 1.0
+    covered = sum(active.get(k, 0.0) for k, v in components.items() if v is not None)
+    return covered / total
+
+
+def shrink(composite: float, confidence: float) -> float:
+    """Pull a composite toward the neutral prior in proportion to missing evidence.
+
+    Without this, renormalizing over available tiers lets a skill with nothing
+    but clean lint tie — or beat — a skill measured end-to-end and found good.
+    """
+    return composite * confidence + NEUTRAL_PRIOR * (1.0 - confidence)
 
 
 def _cluster_for(skill: str, clusters: list[OverlapCluster]) -> OverlapCluster | None:
@@ -184,7 +205,9 @@ def build_scorecard(
             "critic": critic.score if critic else None,
         }
         composite = composite_score(components, weights)
-        scored[meta.name] = composite
+        confidence = coverage_confidence(components, weights)
+        ranked = shrink(composite, confidence)
+        scored[meta.name] = ranked
         mined = mined_by.get(meta.name)
         entry = ScorecardEntry(
             skill=meta.name,
@@ -200,6 +223,8 @@ def build_scorecard(
                 "critic": critic is not None,
             },
             composite=round(composite, 4),
+            confidence=round(confidence, 4),
+            ranked_score=round(ranked, 4),
         )
         drafts.append((meta, entry))
 
@@ -210,6 +235,7 @@ def build_scorecard(
 
     for meta, entry in drafts:
         cluster = _cluster_for(meta.name, all_clusters)
+        # Survivor is the best-evidenced member, not merely the best-scoring one.
         cluster_best = (
             max(cluster.skills, key=lambda s: scored.get(s, 0.0)) if cluster else None
         )
@@ -230,7 +256,7 @@ def build_scorecard(
     for cluster in all_clusters:
         cluster.merge_into = max(cluster.skills, key=lambda s: scored.get(s, 0.0))
 
-    entries.sort(key=lambda e: (-e.composite, e.skill))
+    entries.sort(key=lambda e: (-e.ranked_score, e.skill))
     return PortfolioReport(
         entries=entries,
         clusters=all_clusters,
