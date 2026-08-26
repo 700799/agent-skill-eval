@@ -34,10 +34,10 @@ class ReplayRunner:
         workspace: Path,
         limits: RunLimits,
         *,
-        bare: bool = False,
+        no_skills: bool = False,
         raw_out: Path | None = None,
     ) -> Trajectory:
-        del prompt, limits, bare
+        del prompt, limits, no_skills
         fixture = self.fixtures[self._calls % len(self.fixtures)]
         self._calls += 1
         if raw_out is not None:

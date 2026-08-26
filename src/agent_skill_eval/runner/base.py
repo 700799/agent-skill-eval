@@ -16,13 +16,13 @@ class AgentRunner(Protocol):
         workspace: Path,
         limits: RunLimits,
         *,
-        bare: bool = False,
+        no_skills: bool = False,
         raw_out: Path | None = None,
     ) -> Trajectory:
         """Execute one agent session in ``workspace`` and return its trajectory.
 
-        ``bare=True`` is the Control arm: no skills or user settings are loaded.
-        ``raw_out``, when given, receives the raw NDJSON event stream for
-        later replay and mining.
+        ``no_skills=True`` is the Control arm: skill loading is disabled outright,
+        so the baseline measures the unaided model. ``raw_out``, when given,
+        receives the raw NDJSON event stream for later replay and mining.
         """
         ...

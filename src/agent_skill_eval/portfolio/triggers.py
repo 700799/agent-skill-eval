@@ -92,7 +92,7 @@ def _headless(
     with sandbox(WorkspaceSpec()) as workspace:
         for meta in skills:
             inject_skill(workspace, Path(meta.path))
-        trajectory = runner.run(probe, workspace, limits, bare=False)
+        trajectory = runner.run(probe, workspace, limits, no_skills=False)
     known = {s.name for s in skills}
     return [name for name in trajectory.skill_activations() if name in known]
 

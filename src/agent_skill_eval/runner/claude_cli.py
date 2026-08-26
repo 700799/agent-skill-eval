@@ -1,7 +1,10 @@
 """Live runner: drives `claude -p` as a subprocess and captures the event stream.
 
-Control arm passes ``--bare`` (no skills or user settings); Treatment relies on
-the skill injected into the workspace's ``.claude/skills/`` by
+The Control arm passes ``--disable-slash-commands``, which is what actually
+turns skills off: ``--bare`` only skips hooks, LSP, and plugin credentials —
+its own help notes that "Skills still resolve via /skill-name", so it would
+leak the very thing the baseline is meant to exclude. Treatment loads the skill
+injected into the workspace's ``.claude/skills/`` by
 :func:`agent_skill_eval.runner.workspace.inject_skill`.
 """
 
@@ -21,18 +24,20 @@ class ClaudeCliRunner:
         self,
         *,
         claude_bin: str = "claude",
-        permission_mode: str = "bypassPermissions",
+        permission_mode: str = "acceptEdits",
         extra_args: list[str] | None = None,
     ) -> None:
-        """``permission_mode`` defaults to bypassPermissions because eval runs
-        execute headless in disposable sandbox workspaces; pass ``"default"``
-        (or any other CLI-supported mode) to restore prompting semantics.
+        """``permission_mode`` defaults to ``acceptEdits`` so headless runs can
+        edit files in their disposable sandbox without prompting.
+        ``bypassPermissions`` is deliberately not the default: it maps to
+        ``--dangerously-skip-permissions``, which the CLI refuses to run as
+        root. Pass ``""`` to omit the flag entirely.
         """
         self.claude_bin = claude_bin
         self.permission_mode = permission_mode
         self.extra_args = list(extra_args or [])
 
-    def _build_argv(self, prompt: str, limits: RunLimits, *, bare: bool) -> list[str]:
+    def _build_argv(self, prompt: str, limits: RunLimits, *, no_skills: bool) -> list[str]:
         argv = [
             self.claude_bin,
             "-p",
@@ -49,8 +54,9 @@ class ClaudeCliRunner:
             argv += ["--permission-mode", self.permission_mode]
         if limits.model:
             argv += ["--model", limits.model]
-        if bare:
-            argv += ["--bare"]
+        if no_skills:
+            # Control arm: the only flag that genuinely stops skills loading.
+            argv += ["--disable-slash-commands"]
         if limits.allowed_tools:
             argv += ["--allowedTools", ",".join(limits.allowed_tools)]
         if limits.disallowed_tools:
@@ -64,10 +70,10 @@ class ClaudeCliRunner:
         workspace: Path,
         limits: RunLimits,
         *,
-        bare: bool = False,
+        no_skills: bool = False,
         raw_out: Path | None = None,
     ) -> Trajectory:
-        argv = self._build_argv(prompt, limits, bare=bare)
+        argv = self._build_argv(prompt, limits, no_skills=no_skills)
         started = time.monotonic()
         timed_out = False
         try:

@@ -32,7 +32,8 @@ def _run_tool(args: list[str], cwd: Path) -> tuple[int, str, str] | None:
 
 
 def _ruff_issues(workspace: Path, paths: list[str], strict: bool) -> tuple[int, list[str]] | None:
-    args = ["ruff", "check", "--output-format", "json", "--exclude", ".claude"]
+    # --no-cache keeps the graded workspace free of .ruff_cache artifacts.
+    args = ["ruff", "check", "--no-cache", "--output-format", "json", "--exclude", ".claude"]
     if strict:
         args += ["--select", "E,W,F,I,N,UP,B,SIM,C4"]
     result = _run_tool(args + paths, workspace)

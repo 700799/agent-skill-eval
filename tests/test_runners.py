@@ -77,22 +77,27 @@ def test_build_argv_treatment_and_control() -> None:
         allowed_tools=["Read", "Edit"],
         disallowed_tools=["Bash(rm *)"],
     )
-    argv = runner._build_argv("do it", limits, bare=False)
+    argv = runner._build_argv("do it", limits, no_skills=False)
     assert argv[:3] == ["claude", "-p", "do it"]
     assert argv[3:5] == ["--output-format", "stream-json"]
     assert "--verbose" in argv
     assert argv[argv.index("--max-turns") : argv.index("--max-turns") + 2] == ["--max-turns", "6"]
     assert "0.15" in argv
     assert argv[argv.index("--model") : argv.index("--model") + 2] == ["--model", "claude-sonnet-5"]
-    assert "--bare" not in argv
+    assert "--disable-slash-commands" not in argv
+    assert (
+        argv[argv.index("--permission-mode") : argv.index("--permission-mode") + 2]
+    ) == ["--permission-mode", "acceptEdits"]
     assert (
         argv[argv.index("--allowedTools") : argv.index("--allowedTools") + 2]
     ) == ["--allowedTools", "Read,Edit"]
     assert (
         argv[argv.index("--disallowedTools") : argv.index("--disallowedTools") + 2]
     ) == ["--disallowedTools", "Bash(rm *)"]
-    control = runner._build_argv("do it", LIMITS, bare=True)
-    assert "--bare" in control
+    # Control disables skills outright; --bare would NOT (it leaves skills resolvable).
+    control = runner._build_argv("do it", LIMITS, no_skills=True)
+    assert "--disable-slash-commands" in control
+    assert "--bare" not in control
     assert "--model" not in control
 
 

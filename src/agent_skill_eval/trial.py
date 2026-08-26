@@ -68,7 +68,7 @@ def run_trial(
             loaded.spec.prompt,
             workspace,
             loaded.spec.run_limits,
-            bare=arm == "control",
+            no_skills=arm == "control",
             raw_out=raw_out,
         )
         metrics = compute_metrics(trajectory, loaded)
