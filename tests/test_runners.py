@@ -79,18 +79,18 @@ def test_build_argv_treatment_and_control() -> None:
     )
     argv = runner._build_argv("do it", limits, bare=False)
     assert argv[:3] == ["claude", "-p", "do it"]
-    assert ["--output-format", "stream-json"] == argv[3:5]
+    assert argv[3:5] == ["--output-format", "stream-json"]
     assert "--verbose" in argv
-    assert ["--max-turns", "6"] == argv[argv.index("--max-turns") : argv.index("--max-turns") + 2]
+    assert argv[argv.index("--max-turns") : argv.index("--max-turns") + 2] == ["--max-turns", "6"]
     assert "0.15" in argv
-    assert ["--model", "claude-sonnet-5"] == argv[argv.index("--model") : argv.index("--model") + 2]
+    assert argv[argv.index("--model") : argv.index("--model") + 2] == ["--model", "claude-sonnet-5"]
     assert "--bare" not in argv
-    assert ["--allowedTools", "Read,Edit"] == (
+    assert (
         argv[argv.index("--allowedTools") : argv.index("--allowedTools") + 2]
-    )
-    assert ["--disallowedTools", "Bash(rm *)"] == (
+    ) == ["--allowedTools", "Read,Edit"]
+    assert (
         argv[argv.index("--disallowedTools") : argv.index("--disallowedTools") + 2]
-    )
+    ) == ["--disallowedTools", "Bash(rm *)"]
     control = runner._build_argv("do it", LIMITS, bare=True)
     assert "--bare" in control
     assert "--model" not in control

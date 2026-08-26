@@ -1,9 +1,10 @@
 from pathlib import Path
 
+from tests.conftest import TrajectoryBuilder
+
 from agent_skill_eval.metrics import loops, tokens
 from agent_skill_eval.models.trajectory import Usage
 from agent_skill_eval.runner.ndjson import parse_file
-from tests.conftest import TrajectoryBuilder
 
 BIG = {"file_path": "/ws/big.py"}
 

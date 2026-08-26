@@ -59,6 +59,7 @@ class _StreamState:
         self.pending_chars = 0
         self.last_message_id: str | None = None
         self.model: str | None = None
+        self.cwd: str | None = None
         self.outcome: RunOutcome | None = None
         self.session_ids: set[str] = set()
 
@@ -140,6 +141,9 @@ class _StreamState:
         model = event.get("model")
         if isinstance(model, str) and model:
             self.model = model
+        cwd = event.get("cwd")
+        if isinstance(cwd, str) and cwd:
+            self.cwd = cwd
         session_id = event.get("session_id")
         if isinstance(session_id, str):
             self.session_ids.add(session_id)
@@ -191,6 +195,7 @@ def parse_events(
     return Trajectory(
         source=source,
         model=state.model,
+        cwd=state.cwd,
         turns=state.turns,
         tool_results=state.tool_results,
         inter_turn_char_lens=state.inter_turn_char_lens,

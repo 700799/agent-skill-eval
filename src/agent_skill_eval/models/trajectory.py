@@ -74,6 +74,7 @@ class RunOutcome(_TolerantModel):
 class Trajectory(_TolerantModel):
     source: Literal["live", "replay", "mined"]
     model: str | None = None
+    cwd: str | None = None
     turns: list[AssistantTurn] = Field(default_factory=list)
     tool_results: dict[str, ToolResultRec] = Field(default_factory=dict)
     inter_turn_char_lens: list[int] = Field(default_factory=list)

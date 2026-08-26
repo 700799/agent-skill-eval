@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from tests.conftest import FakeLLM
+
 from agent_skill_eval.evaluators import EvalContext, registered_types, run_evaluations
 from agent_skill_eval.evaluators.ast_assertions import evaluate as eval_ast
 from agent_skill_eval.evaluators.llm_judge import evaluate as eval_judge
@@ -17,7 +19,6 @@ from agent_skill_eval.models.task import (
     TrajectoryEfficiencyEval,
 )
 from agent_skill_eval.runner.ndjson import parse_file
-from tests.conftest import FakeLLM
 
 TASK = TaskSpec(
     id="t-eval",

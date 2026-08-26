@@ -8,18 +8,24 @@ from pathlib import Path
 from agent_skill_eval.models.task import RunLimits
 from agent_skill_eval.models.trajectory import Trajectory
 from agent_skill_eval.runner.ndjson import parse_file
+from agent_skill_eval.runner.workspace import apply_tool_mutations
 
 
 class ReplayRunner:
-    """Serves fixture files round-robin across successive ``run()`` calls."""
+    """Serves fixture files round-robin across successive ``run()`` calls.
 
-    def __init__(self, fixtures: list[Path]) -> None:
+    Recorded file mutations are replayed into the workspace by default so the
+    code-quality evaluators grade the state the agent actually produced.
+    """
+
+    def __init__(self, fixtures: list[Path], *, apply_mutations: bool = True) -> None:
         if not fixtures:
             raise ValueError("ReplayRunner needs at least one fixture file")
         missing = [str(f) for f in fixtures if not Path(f).is_file()]
         if missing:
             raise FileNotFoundError(f"replay fixtures not found: {missing}")
         self.fixtures = [Path(f) for f in fixtures]
+        self.apply_mutations = apply_mutations
         self._calls = 0
 
     def run(
@@ -31,7 +37,7 @@ class ReplayRunner:
         bare: bool = False,
         raw_out: Path | None = None,
     ) -> Trajectory:
-        del prompt, workspace, limits, bare
+        del prompt, limits, bare
         fixture = self.fixtures[self._calls % len(self.fixtures)]
         self._calls += 1
         if raw_out is not None:
@@ -39,4 +45,6 @@ class ReplayRunner:
             shutil.copyfile(fixture, raw_out)
         trajectory = parse_file(fixture, source="replay")
         trajectory.outcome.duration_seconds = 0.0
+        if self.apply_mutations:
+            apply_tool_mutations(workspace, trajectory)
         return trajectory

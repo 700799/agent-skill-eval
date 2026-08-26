@@ -9,12 +9,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from agent_skill_eval import config
+
+#: Default linter set for pydev_static (module-level so the Literal type survives).
+_DEFAULT_LINTERS: list[Literal["ruff", "mypy"]] = ["ruff"]
 
 
 class _StrictModel(BaseModel):
@@ -57,7 +60,9 @@ class PydevStaticEval(_StrictModel):
     """Run ruff and/or mypy over the final workspace."""
 
     type: Literal["pydev_static"]
-    linters: list[Literal["ruff", "mypy"]] = Field(default_factory=lambda: ["ruff"])
+    linters: list[Literal["ruff", "mypy"]] = Field(
+        default_factory=lambda: list(_DEFAULT_LINTERS)
+    )
     strict: bool = False
     paths: list[str] = Field(default_factory=lambda: ["."])
     required: bool = True
@@ -118,14 +123,12 @@ class LlmJudgeEval(_StrictModel):
 
 
 EvaluationSpec = Annotated[
-    Union[
-        SkillActivationEval,
-        PydevStaticEval,
-        PydevTestsEval,
-        AstAssertionsEval,
-        TrajectoryEfficiencyEval,
-        LlmJudgeEval,
-    ],
+    SkillActivationEval
+    | PydevStaticEval
+    | PydevTestsEval
+    | AstAssertionsEval
+    | TrajectoryEfficiencyEval
+    | LlmJudgeEval,
     Field(discriminator="type"),
 ]
 
