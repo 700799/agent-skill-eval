@@ -1,0 +1,35 @@
+# Trigger-accuracy probes for the example skill library.
+# Each skill's should_trigger prompts are automatically treated as negatives
+# for every *other* skill (cross_negatives), which is what fills the confusion
+# matrix and surfaces skills that fire on each other's work.
+defaults:
+  mode: classifier
+  classifier_model: claude-haiku-4-5
+
+skills_dir: examples/skills
+cross_negatives: true
+
+shared_negatives:
+  - "What's the capital of France?"
+  - "Write a bash script that rotates nginx logs."
+  - "Optimize this numpy matrix multiplication for cache locality."
+
+probes:
+  - skill: fastapi-schema
+    should_trigger:
+      - "Add a response model with validation to my FastAPI endpoint."
+      - "This route returns a raw dict — give it a proper schema."
+    should_not_trigger:
+      - "Set up a GitHub Actions workflow for my Python package."
+
+  - skill: py-validation
+    should_trigger:
+      - "My Pydantic model needs a custom validator for the email field."
+    should_not_trigger:
+      - "Profile this function and tell me why it is slow."
+
+  - skill: helpful-helper
+    should_trigger:
+      - "Help me with the thing in the usual way."
+    should_not_trigger:
+      - "Rename this variable across the repository."
