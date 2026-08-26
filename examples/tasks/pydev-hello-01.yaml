@@ -1,0 +1,23 @@
+# Cheap task for live smoke-testing the real claude CLI end to end.
+id: pydev-hello-01
+description: "Minimal live smoke test: two turns, tiny budget."
+target_skill: "../skills/fastapi-schema/SKILL.md"
+
+workspace:
+  initial_files:
+    hello.py: |
+      def greet(name):
+          return "hello " + name
+
+prompt: "Add a return type annotation and a parameter type annotation to greet() in hello.py. Then stop."
+
+run_limits:
+  max_turns: 3
+  max_budget_usd: 0.05
+
+evaluations:
+  - type: pydev_static
+    linters: [ruff]
+  - type: trajectory_efficiency
+    max_duplicate_tool_calls: 1
+    max_file_re_reads: 2
