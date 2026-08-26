@@ -1,0 +1,5 @@
+{"type": "system", "subtype": "init", "model": "claude-sonnet-5", "session_id": "sess-err", "cwd": "/workspace"}
+{"type": "assistant", "message": {"id": "msg_e1", "role": "assistant", "content": [{"type": "tool_use", "id": "tu_e1", "name": "Read", "input": {"file_path": "/workspace/app.py"}}], "usage": {"input_tokens": 900, "output_tokens": 40, "cache_read_input_tokens": 7000}}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "tu_e1", "content": [{"type": "text", "text": "     1\tfrom fastapi import FastAPI\n     2\tapp = FastAPI()\n     3\t@app.get(\"/items\")\n     4\tdef read_items(): return {\"id\": 1, \"name\": \"Item\"}\n     5\t"}]}]}}
+{"type": "assistant", "message": {"id": "msg_e2", "role": "assistant", "content": [{"type": "text", "text": "I still need to inspect a few more things before editing."}], "usage": {"input_tokens": 950, "output_tokens": 55, "cache_read_input_tokens": 7100}}}
+{"type": "result", "subtype": "error_max_turns", "usage": {"input_tokens": 900, "output_tokens": 400, "cache_read_input_tokens": 30000, "cache_creation_input_tokens": 0}, "num_turns": 6, "session_id": "sess-err"}

@@ -64,6 +64,7 @@ class RunOutcome(_TolerantModel):
     num_turns: int = 0
     session_id: str | None = None
     duration_seconds: float | None = None
+    error: str | None = None
 
     @property
     def is_success(self) -> bool:
