@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from agent_skill_eval.runner.ndjson import parse_events, parse_file
+from skill_eval_kit.runner.ndjson import parse_events, parse_file
 
 
 def test_success_fixture_parses(success_fixture: Path) -> None:

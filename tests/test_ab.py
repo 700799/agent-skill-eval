@@ -2,12 +2,12 @@
 
 from pathlib import Path
 
-from agent_skill_eval.ab import run_ab
-from agent_skill_eval.models.results import ABReport
-from agent_skill_eval.models.task import LoadedTask, load_task
-from agent_skill_eval.report import render_ab_report
-from agent_skill_eval.runner.replay import ReplayRunner
-from agent_skill_eval.runs import load_ab_reports, new_run_dir, save_json, save_meta
+from skill_eval_kit.ab import run_ab
+from skill_eval_kit.models.results import ABReport
+from skill_eval_kit.models.task import LoadedTask, load_task
+from skill_eval_kit.report import render_ab_report
+from skill_eval_kit.runner.replay import ReplayRunner
+from skill_eval_kit.runs import load_ab_reports, new_run_dir, save_json, save_meta
 
 LEGACY_APP = '''\
 from fastapi import FastAPI

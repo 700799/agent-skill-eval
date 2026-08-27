@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from agent_skill_eval.cli import EXIT_OK, main
-from agent_skill_eval.models.task import RunLimits
-from agent_skill_eval.runner.claude_cli import ClaudeCliRunner
+from skill_eval_kit.cli import EXIT_OK, main
+from skill_eval_kit.models.task import RunLimits
+from skill_eval_kit.runner.claude_cli import ClaudeCliRunner
 
 pytestmark = pytest.mark.live
 

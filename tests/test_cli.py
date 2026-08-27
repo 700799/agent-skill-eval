@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from agent_skill_eval.cli import EXIT_FAILED, EXIT_OK, EXIT_USAGE, main
+from skill_eval_kit.cli import EXIT_FAILED, EXIT_OK, EXIT_USAGE, main
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 TASK = EXAMPLES / "tasks" / "pydev-fastapi-pydantic-01.yaml"

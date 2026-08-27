@@ -2,14 +2,14 @@ from pathlib import Path
 
 from tests.conftest import FakeLLM
 
-from agent_skill_eval.evaluators import EvalContext, registered_types, run_evaluations
-from agent_skill_eval.evaluators.ast_assertions import evaluate as eval_ast
-from agent_skill_eval.evaluators.llm_judge import evaluate as eval_judge
-from agent_skill_eval.evaluators.pydev_static import evaluate as eval_static
-from agent_skill_eval.evaluators.pydev_tests import evaluate as eval_tests
-from agent_skill_eval.evaluators.skill_activation import evaluate as eval_skill
-from agent_skill_eval.evaluators.trajectory_efficiency import evaluate as eval_traj
-from agent_skill_eval.models.task import (
+from skill_eval_kit.evaluators import EvalContext, registered_types, run_evaluations
+from skill_eval_kit.evaluators.ast_assertions import evaluate as eval_ast
+from skill_eval_kit.evaluators.llm_judge import evaluate as eval_judge
+from skill_eval_kit.evaluators.pydev_static import evaluate as eval_static
+from skill_eval_kit.evaluators.pydev_tests import evaluate as eval_tests
+from skill_eval_kit.evaluators.skill_activation import evaluate as eval_skill
+from skill_eval_kit.evaluators.trajectory_efficiency import evaluate as eval_traj
+from skill_eval_kit.models.task import (
     AstAssertionsEval,
     LlmJudgeEval,
     PydevStaticEval,
@@ -18,7 +18,7 @@ from agent_skill_eval.models.task import (
     TaskSpec,
     TrajectoryEfficiencyEval,
 )
-from agent_skill_eval.runner.ndjson import parse_file
+from skill_eval_kit.runner.ndjson import parse_file
 
 TASK = TaskSpec(
     id="t-eval",

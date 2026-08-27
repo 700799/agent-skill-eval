@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from agent_skill_eval.models.trajectory import (
+from skill_eval_kit.models.trajectory import (
     AssistantTurn,
     RunOutcome,
     ToolCall,

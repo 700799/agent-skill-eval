@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from agent_skill_eval.models import TaskSpec, derive_skill_name, load_task
+from skill_eval_kit.models import TaskSpec, derive_skill_name, load_task
 
 SPEC_EXAMPLE = """\
 id: pydev-fastapi-pydantic-01
