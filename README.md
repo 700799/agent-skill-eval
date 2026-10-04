@@ -253,6 +253,41 @@ adherence checks, and portfolio-scale ranking, and it runs anywhere the CLI
 runs. It is pinned against the `2.1.x` stream-json shape and parses defensively,
 ignoring unknown event types and fields so format drift degrades rather than breaks.
 
+## Releasing
+
+Publishing runs on [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
+via `.github/workflows/release.yml` — no API token is stored in this repository.
+
+One-time setup, per index, at https://pypi.org/manage/account/publishing/
+(and the same on test.pypi.org):
+
+| Field | Value |
+|---|---|
+| PyPI project name | `skill-eval-kit` |
+| Owner / repository | `700799` / `agent-skill-eval` |
+| Workflow name | `release.yml` |
+| Environment | `pypi` (`testpypi` on TestPyPI) |
+
+Then:
+
+```bash
+# Dry run to TestPyPI first — Actions tab -> Release -> Run workflow -> testpypi
+# Real release:
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+The workflow lints, type-checks, tests, builds, and runs `twine check` before
+uploading, and **fails the build if the tag version disagrees with
+`pyproject.toml`**. That guard matters: a version number can never be reused on
+PyPI, even after deletion, so a wrong tag would otherwise burn it permanently.
+
+To publish by hand with an API token instead (username is literally `__token__`):
+
+```bash
+uv build && uvx twine check dist/*
+uvx twine upload dist/*
+```
+
 ## License
 
 MIT
