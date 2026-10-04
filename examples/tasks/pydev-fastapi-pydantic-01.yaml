@@ -1,0 +1,41 @@
+# The reference task: verbatim from the framework spec, plus AST adherence
+# assertions that catch a "passes the tests but ignored the skill" bypass.
+id: pydev-fastapi-pydantic-01
+description: "Verify that the fastapi-schema skill refactors raw dicts into idiomatic Pydantic v2 models."
+target_skill: "../skills/fastapi-schema/SKILL.md"
+
+workspace:
+  initial_files:
+    app.py: |
+      from fastapi import FastAPI
+      app = FastAPI()
+      @app.get("/items")
+      def read_items(): return {"id": 1, "name": "Item"}
+
+prompt: "Refactor app.py to return a Pydantic model using the loaded fastapi-schema skill."
+
+run_limits:
+  max_turns: 6
+  max_budget_usd: 0.15
+
+evaluations:
+  - type: skill_activation
+    expected: "fastapi-schema"
+  - type: pydev_static
+    linters: [ruff]
+  - type: ast_assertions
+    assertions:
+      - file: app.py
+        kind: decorator_used
+        value: field_validator
+      - file: app.py
+        kind: class_inherits
+        value: BaseModel
+      - file: app.py
+        kind: forbidden_decorator
+        value: validator
+  - type: trajectory_efficiency
+    max_duplicate_tool_calls: 1
+    max_file_re_reads: 2
+  - type: llm_judge
+    rubric: "Did the code use Pydantic V2 `@field_validator` syntax as required by the skill instead of legacy V1 syntax?"
